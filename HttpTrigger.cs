@@ -1,23 +1,29 @@
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace MyFunctionApp;
 
 public class HttpTrigger
 {
-    private readonly ILogger<HttpTrigger> _logger;
+    private readonly ILogger _logger;
 
-    public HttpTrigger(ILogger<HttpTrigger> logger)
+    public HttpTrigger(ILoggerFactory loggerFactory)
     {
-        _logger = logger;
+        _logger = loggerFactory.CreateLogger<HttpTrigger>();
     }
 
     [Function("HttpTrigger")]
-    public IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
+    public HttpResponseData Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequestData req)
     {
-        _logger.LogInformation("C# HTTP trigger function processed a request.");
-        return new OkObjectResult("Welcome to Azure Functions!");
+        _logger.LogInformation("Function triggered.");
+
+        var response = req.CreateResponse(HttpStatusCode.OK);
+
+        response.WriteString("Hello Mahesh! Azure Function deployed successfully using GitHub Actions and Terraform.");
+
+        return response;
     }
 }
